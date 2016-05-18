@@ -63,7 +63,7 @@ public class NavigationPath {
     }
 
     private Collection<PathNode> getPath() {
-        Collection<PathNode> path = new ArrayList<PathNode>();
+        ArrayList<PathNode> path = new ArrayList<PathNode>();
         PathNode current = nodeAt(closedNodes, pointB);
         PathNode startNode = nodeAt(closedNodes, pointA);
 
@@ -71,7 +71,7 @@ public class NavigationPath {
             path.add(current);
             current = current.getParent();
         }
-
+        Collections.reverse(path);
         return path;
     }
 

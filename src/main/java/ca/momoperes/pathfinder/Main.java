@@ -11,7 +11,10 @@ public class Main {
         Point b = new Point(10, 10);
         long time = System.currentTimeMillis();
         Collection<PathNode> nodes = new NavigationPath(a, b, Arrays.asList(new Point(6, 6))).calculatePath();
-        System.out.println("Done in " + String.valueOf(System.currentTimeMillis() - time) + "ms.");
+        for (PathNode node : nodes) {
+            System.out.println(node);
+        }
+        System.out.println("Done in " + String.valueOf((double) (System.currentTimeMillis() - time) / 20) + " ticks.");
     }
 
 }

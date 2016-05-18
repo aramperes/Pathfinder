@@ -50,4 +50,9 @@ public class PathNode {
     public void setParent(PathNode parent) {
         this.parent = parent;
     }
+
+    @Override
+    public String toString() {
+        return "(" + String.valueOf(point.x) + ";" + String.valueOf(point.y) + "): F=" + String.valueOf(f);
+    }
 }
