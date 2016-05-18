@@ -31,12 +31,8 @@ public class NavigationPath {
             path.add(current);
             current = current.getParent();
         }
-
-        System.out.println("Done!");
-        for (PathNode openNode : path) {
-            System.out.println("(" + openNode.getPoint().x + ";" + openNode.getPoint().y + "): F=" + openNode.getF());
-        }
-        return null;
+        
+        return path;
     }
 
     public boolean same(Point a, Point b) {
