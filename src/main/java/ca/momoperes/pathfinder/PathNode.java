@@ -4,18 +4,18 @@ import java.awt.*;
 
 public class PathNode {
 
-    private Point point;
+    private IntVector point;
     private double g, h, f;
     private PathNode parent;
 
-    public PathNode(Point point, double g, double h, double f) {
+    public PathNode(IntVector point, double g, double h, double f) {
         this.point = point;
         this.g = g;
         this.h = h;
         this.f = f;
     }
 
-    public Point getPoint() {
+    public IntVector getPoint() {
         return point;
     }
 
@@ -53,6 +53,6 @@ public class PathNode {
 
     @Override
     public String toString() {
-        return "(" + String.valueOf(point.x) + ";" + String.valueOf(point.y) + "): F=" + String.valueOf(f);
+        return "(" + String.valueOf(point.x) + ";" + String.valueOf(point.y) + ";" + String.valueOf(point.z) + "): F=" + String.valueOf(f);
     }
 }

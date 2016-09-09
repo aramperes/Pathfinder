@@ -1,6 +1,5 @@
 package ca.momoperes.pathfinder;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,21 +9,21 @@ public class NavigationPath {
 
     private Collection<PathNode> openNodes;
     private Collection<PathNode> closedNodes;
-    private Point pointA, pointB;
-    private Collection<Point> obstacles;
+    private IntVector pointA, pointB;
+    private Collection<IntVector> map;
 
     /**
      * Represents a path with two target points and a collection of obstacles.
      * To calculate the actual path, use NavigationPath#calculatePath.
      *
-     * @param pointA    the first target point
-     * @param pointB    the second target point
-     * @param obstacles a collection of obstacles to the path
+     * @param pointA the first target point
+     * @param pointB the second target point
+     * @param map    a collection of obstacles to the path
      */
-    public NavigationPath(Point pointA, Point pointB, Collection<Point> obstacles) {
+    public NavigationPath(IntVector pointA, IntVector pointB, Collection<IntVector> map) {
         this.pointA = pointA;
         this.pointB = pointB;
-        this.obstacles = Collections.unmodifiableCollection(obstacles);
+        this.map = Collections.unmodifiableCollection(map);
         this.openNodes = new ArrayList<PathNode>();
         this.closedNodes = new ArrayList<PathNode>();
     }
@@ -43,20 +42,25 @@ public class NavigationPath {
 
             if (same(current.getPoint(), pointB))
                 return getPath();
-            Point[] neighbours = getNeighbours(current.getPoint());
-            for (Point neighbour : neighbours) {
-                if (obstacles.contains(neighbour) || contains(closedNodes, neighbour))
+            IntVector[] neighbours = getNeighbours(current.getPoint());
+            Collection<IntVector> unreachable = getUnreachableSurroundings(current.getPoint(), neighbours);
+            for (IntVector neighbour : neighbours) {
+                if (neighbour == null) {
                     continue;
-
+                }
+                if (unreachable.contains(neighbour) || contains(closedNodes, neighbour)) {
+                    continue;
+                }
                 PathNode node = calculateNode(neighbour);
                 double newCost = current.getG() + distance(current.getPoint(), neighbour);
-                if (newCost < node.getG() || !contains(openNodes, neighbour)) {
+                if (newCost < node.getG() || !contains(openNodes, neighbour) || neighbours.length - unreachable.size() <= 1) {
                     node.setG(newCost);
                     node.setH(distance(neighbour, pointB));
                     node.setF(node.getG() + node.getH());
                     node.setParent(current);
-                    if (!contains(openNodes, neighbour))
+                    if (!contains(openNodes, neighbour)) {
                         openNodes.add(node);
+                    }
                 }
             }
         }
@@ -88,7 +92,6 @@ public class NavigationPath {
                 lowest = pathNode;
                 continue;
             }
-
             if (pathNode.getF() < lowest.getF() || (pathNode.getF() == lowest.getF() && pathNode.getH() < lowest.getH())) {
                 lowest = pathNode;
             }
@@ -102,17 +105,39 @@ public class NavigationPath {
      * @param point the central point
      * @return the point's neighbours
      */
-    public Point[] getNeighbours(Point point) {
-        List<Point> points = new ArrayList<Point>();
-        points.add(new Point(point.x + 1, point.y));
-        points.add(new Point(point.x + 1, point.y + 1));
-        points.add(new Point(point.x + 1, point.y - 1));
-        points.add(new Point(point.x - 1, point.y));
-        points.add(new Point(point.x - 1, point.y + 1));
-        points.add(new Point(point.x - 1, point.y - 1));
-        points.add(new Point(point.x, point.y + 1));
-        points.add(new Point(point.x, point.y - 1));
-        return points.toArray(new Point[points.size()]);
+    public IntVector[] getNeighbours(IntVector point) {
+        List<IntVector> points = new ArrayList<IntVector>();
+        points.add(getVectorAt(point.x + 1, point.y));
+        points.add(getVectorAt(point.x + 1, point.y + 1));
+        points.add(getVectorAt(point.x + 1, point.y - 1));
+        points.add(getVectorAt(point.x - 1, point.y));
+        points.add(getVectorAt(point.x - 1, point.y + 1));
+        points.add(getVectorAt(point.x - 1, point.y - 1));
+        points.add(getVectorAt(point.x, point.y + 1));
+        points.add(getVectorAt(point.x, point.y - 1));
+        return points.toArray(new IntVector[points.size()]);
+    }
+
+    public Collection<IntVector> getUnreachableSurroundings(IntVector point, IntVector[] vectors) {
+        int z = point.z;
+        Collection<IntVector> collection = new ArrayList<IntVector>();
+        for (IntVector vector : vectors) {
+            if (vector == null)
+                continue;
+            if (Math.abs(vector.z - z) > 1) {
+                continue;
+            }
+            collection.add(vector);
+        }
+        return collection;
+    }
+
+    public IntVector getVectorAt(int x, int y) {
+        for (IntVector intVector : map) {
+            if (intVector.x == x && intVector.y == y)
+                return intVector;
+        }
+        return null;
     }
 
     /**
@@ -122,7 +147,7 @@ public class NavigationPath {
      * @param p          the point
      * @return the node, null if it could not be found
      */
-    public PathNode nodeAt(Collection<PathNode> collection, Point p) {
+    public PathNode nodeAt(Collection<PathNode> collection, IntVector p) {
         for (PathNode pathNode : collection) {
             if (same(pathNode.getPoint(), p))
                 return pathNode;
@@ -136,14 +161,14 @@ public class NavigationPath {
      * @param point the position of the node
      * @return the node
      */
-    public PathNode calculateNode(Point point) {
+    public PathNode calculateNode(IntVector point) {
         double g = Math.ceil(distance(point, pointA));
         double h = Math.ceil(distance(point, pointB));
         double f = g + h;
         return new PathNode(point, g, h, f);
     }
 
-    private boolean same(Point a, Point b) {
+    private boolean same(IntVector a, IntVector b) {
         return a.x == b.x && a.y == b.y;
     }
 
@@ -155,24 +180,24 @@ public class NavigationPath {
         return contains(collection, node.getPoint());
     }
 
-    private boolean contains(Collection<PathNode> collection, Point p) {
+    private boolean contains(Collection<PathNode> collection, IntVector p) {
         return nodeAt(collection, p) != null;
     }
 
 
-    private double distance(Point a, Point b) {
+    private double distance(IntVector a, IntVector b) {
         return Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
     }
 
-    public Point getPointA() {
+    public IntVector getPointA() {
         return pointA;
     }
 
-    public Point getPointB() {
+    public IntVector getPointB() {
         return pointB;
     }
 
-    public Collection<Point> getObstacles() {
-        return obstacles;
+    public Collection<IntVector> getMap() {
+        return map;
     }
 }
