@@ -22,7 +22,10 @@ public class Main {
                 "1  1  1  1  1  1  1  1  1  1"  // 9
         );
 
-        Collection<PathNode> nodes = new NavigationPath(new IntVector(5, 4, 4), new IntVector(2, 2, 1), map).calculatePath();
+        Collection<PathNode> nodes = new NavigationPath(new IntVector(5, 4, 4), new IntVector(8, 1, 1), map).calculatePath();
+        if (nodes == null) {
+            return;
+        }
         for (PathNode node : nodes) {
             System.out.println(node);
         }

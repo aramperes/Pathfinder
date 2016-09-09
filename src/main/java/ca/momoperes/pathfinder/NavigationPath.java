@@ -37,6 +37,10 @@ public class NavigationPath {
         openNodes.add(calculateNode(pointA));
         while (true) {
             PathNode current = lowest(openNodes);
+            if (current == null) {
+                System.out.println("Destination is unreachable");
+                return null;
+            }
             openNodes.remove(current);
             closedNodes.add(current);
 
@@ -124,7 +128,7 @@ public class NavigationPath {
         for (IntVector vector : vectors) {
             if (vector == null)
                 continue;
-            if (Math.abs(vector.z - z) > 1) {
+            if (Math.abs(vector.z - z) < 2) {
                 continue;
             }
             collection.add(vector);
