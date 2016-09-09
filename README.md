@@ -1,2 +1,2 @@
 # Pathfinder
-A Java A* Pathfinder by momothereal
+A Java A* Pathfinder by momothereal, with support for 3D obstacles
